@@ -1,48 +1,33 @@
-from turtle import Screen
-from snake import Snake
-from food import Food
-from scoreboard import Scoreboard
-import time
+from turtle import Turtle
+ALIGNMENT = "center"
+FONT = ("Courier", 24, "normal")
 
-screen = Screen()
-screen.setup(width=600, height=600)
-screen.bgcolor("black")
-screen.title("My Snake Game")
-screen.tracer(0)
 
-snake = Snake()
-food = Food()
-scoreboard = Scoreboard()
+class Scoreboard(Turtle):
 
-screen.listen()
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-screen.onkey(snake.left, "Left")
-screen.onkey(snake.right, "Right")
+    def __init__(self):
+        super().__init__()
+        self.score = 0
+        with open("data.txt") as data:
+            self.high_score = int(data.read())
+        self.color("white")
+        self.penup()
+        self.goto(0, 270)
+        self.hideturtle()
+        self.update_scoreboard()
 
-game_is_on = True
-while game_is_on:
-    screen.update()
-    time.sleep(0.1)
-    snake.move()
+    def update_scoreboard(self):
+        self.clear()
+        self.write(f"Score: {self.score} High Score: {self.high_score}", align=ALIGNMENT, font=FONT)
 
-    # Detect collision with food.
-    if snake.head.distance(food) < 15:
-        food.refresh()
-        snake.extend()
-        scoreboard.increase_score()
+    def reset(self):
+        if self.score > self.high_score:
+            self.high_score = self.score
+            with open("data.txt", mode="w") as data:
+                data.write(f"{self.high_score}")
+        self.score = 0
+        self.update_scoreboard()
 
-    # Detect collision with wall.
-    if snake.head.xcor() > 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
-        game_is_on = False
-        scoreboard.game_over()
-
-    # Detect collision with tail.
-    for segment in snake.segments:
-        if segment == snake.head:
-            pass
-        elif snake.head.distance(segment) < 10:
-            game_is_on = False
-            scoreboard.game_over()
-
-screen.exitonclick()
+    def increase_score(self):
+        self.score += 1
+        self.update_scoreboard()

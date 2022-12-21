@@ -1,52 +1,33 @@
 from turtle import Turtle
-STARTING_POSITIONS = [(0, 0), (-20, 0), (-40, 0)]
-MOVE_DISTANCE = 20
-UP = 90
-DOWN = 270
-LEFT = 180
-RIGHT = 0
+ALIGNMENT = "center"
+FONT = ("Courier", 24, "normal")
 
 
-class Snake:
+class Scoreboard(Turtle):
 
     def __init__(self):
-        self.segments = []
-        self.create_snake()
-        self.head = self.segments[0]
+        super().__init__()
+        self.score = 0
+        with open("data.txt") as data:
+            self.high_score = int(data.read())
+        self.color("white")
+        self.penup()
+        self.goto(0, 270)
+        self.hideturtle()
+        self.update_scoreboard()
 
-    def create_snake(self):
-        for position in STARTING_POSITIONS:
-            self.add_segment(position)
+    def update_scoreboard(self):
+        self.clear()
+        self.write(f"Score: {self.score} High Score: {self.high_score}", align=ALIGNMENT, font=FONT)
 
-    def add_segment(self, position):
-        new_segment = Turtle("square")
-        new_segment.color("white")
-        new_segment.penup()
-        new_segment.goto(position)
-        self.segments.append(new_segment)
+    def reset(self):
+        if self.score > self.high_score:
+            self.high_score = self.score
+            with open("data.txt", mode="w") as data:
+                data.write(f"{self.high_score}")
+        self.score = 0
+        self.update_scoreboard()
 
-    def extend(self):
-        self.add_segment(self.segments[-1].position())
-
-    def move(self):
-        for seg_num in range(len(self.segments) - 1, 0, -1):
-            new_x = self.segments[seg_num - 1].xcor()
-            new_y = self.segments[seg_num - 1].ycor()
-            self.segments[seg_num].goto(new_x, new_y)
-        self.head.forward(MOVE_DISTANCE)
-
-    def up(self):
-        if self.head.heading() != DOWN:
-            self.head.setheading(UP)
-
-    def down(self):
-        if self.head.heading() != UP:
-            self.head.setheading(DOWN)
-
-    def left(self):
-        if self.head.heading() != RIGHT:
-            self.head.setheading(LEFT)
-
-    def right(self):
-        if self.head.heading() != LEFT:
-            self.head.setheading(RIGHT)
+    def increase_score(self):
+        self.score += 1
+        self.update_scoreboard()
